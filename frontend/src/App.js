@@ -1,10 +1,16 @@
-
-import './App.css';
+// import './App.css'
+import Footer from "./components/Footer/Footer";
+import Header from "./components/Header/Header";
+import LandingPage from "./Screen/LandingPage/LandingPage";
 
 function App() {
   return (
     <>
-      Hello MERN
+      <Header />
+      <main>
+        <LandingPage />
+      </main>
+      <Footer />
     </>
   );
 }
