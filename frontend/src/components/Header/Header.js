@@ -7,9 +7,13 @@ import {
   NavDropdown,
   Container,
 } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
 
 const Header = () => {
+
+  const history = useNavigate();
+
   return (
     <Navbar bg="primary" expand="lg" variant="dark">
       <Container>
@@ -28,8 +32,8 @@ const Header = () => {
             </Form>
           </Nav>
           <Nav>
-            <Nav.Link  style={{ color: "#ffff", fontSize: "16px" }}>
-              <Link to={'/mynotes'} >My Note's</Link>
+            <Nav.Link style={{ color: "#ffff", fontSize: "16px" }}>
+              <Link to={"/mynotes"}>My Note's</Link>
             </Nav.Link>
 
             <NavDropdown
@@ -39,7 +43,14 @@ const Header = () => {
             >
               <NavDropdown.Item> My Profile</NavDropdown.Item>
               <NavDropdown.Divider />
-              <NavDropdown.Item href="#action/3.4">Log Out</NavDropdown.Item>
+              <NavDropdown.Item
+                onClick={() => {
+                  localStorage.removeItem("userInfo");
+                  history("/");
+                }}
+              >
+                Log Out
+              </NavDropdown.Item>
             </NavDropdown>
           </Nav>
         </Navbar.Collapse>
