@@ -9,8 +9,8 @@ import {
 } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 
-
 const Header = () => {
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
   const history = useNavigate();
 
@@ -38,14 +38,18 @@ const Header = () => {
 
             <NavDropdown
               style={{ color: "#ffff", fontSize: "16px" }}
-              title="Manish Manker"
+              title={userInfo ? userInfo.name : "Login/Signup"}
               id="basic-nav-dropdown"
             >
-              <NavDropdown.Item> My Profile</NavDropdown.Item>
+              <NavDropdown.Item>
+                <Link to={'/profile'} >My Profile</Link>
+              </NavDropdown.Item>
               <NavDropdown.Divider />
               <NavDropdown.Item
                 onClick={() => {
                   localStorage.removeItem("userInfo");
+                  localStorage.removeItem("userToken");
+                  localStorage.removeItem("noteData");
                   history("/");
                 }}
               >

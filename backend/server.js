@@ -5,6 +5,7 @@ import { ConnectDB } from "./dbConnection.js";
 import { notes } from "./data/notes.js";
 
 import UserRouter from "./routes/userRoute.js";
+import NoteRouter from  "./routes/notesRoutes.js"
 import { errorHandler, notFound } from "./middlewars/errorMiddlewars.js";
 
 config();
@@ -16,6 +17,7 @@ const app = express();
 app.use(express.json());
 
 app.use("/user", UserRouter);
+app.use("/notes", NoteRouter);
 
 app.get("/notes", (req, res) => {
   res.json(notes);

@@ -49,3 +49,31 @@ export const loginUser = asyncHandeler(async (req, res) => {
     throw new Error("Invalid email or password");
   }
 });
+
+export const updateInfo = asyncHandeler(async (req, res) => {
+  try {
+    const userExixt = await User.findById(req.user._id);
+    const { name, email, password } = req.body;
+
+    if (userExixt) {
+      userExixt.name = name;
+      userExixt.email = email;
+      userExixt.password = password;
+
+      const updateData = await userExixt.save();
+      const data = updateData.toObject();
+      const token = generateToken(data._id);
+
+      delete data.password;
+      data.token = token;
+      
+      return res.status(200).json(data);
+    } else {
+      res.status(400).json("Data did not updated");
+      return new Error("Data did not updated");
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json("Data did not updated");
+  }
+});

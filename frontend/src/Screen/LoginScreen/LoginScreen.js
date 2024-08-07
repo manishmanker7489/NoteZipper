@@ -45,7 +45,7 @@ const LoginScreen = () => {
         config
       );
       const data = response.data;
-      // console.log("++++++++++++++++++++++++++++++", data);
+      localStorage.setItem("userToken", data.token);
       localStorage.setItem("userInfo", JSON.stringify(data));
       setloading(false);
       seterror(false);

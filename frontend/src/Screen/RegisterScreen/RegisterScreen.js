@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import MainScreen from "../../components/MainScreen/MainScreen";
 import { Button, Col, Form, Row } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ErrorMessage from "../../components/ErrorMessage";
 import Loading from "../../components/Loading";
@@ -18,6 +18,8 @@ const RegisterScreen = () => {
   const [picMessage, setPicMessage] = useState(null);
   const [error, seterror] = useState(false);
   const [loading, setloading] = useState(false);
+
+  const history = useNavigate();
 
   const submitHandeler = async (e) => {
     e.preventDefault();
@@ -40,6 +42,7 @@ const RegisterScreen = () => {
         const data = response.data;
         localStorage.setItem("userInfo", JSON.stringify(data));
         setloading(false);
+        history("/mynotes");
       } catch (error) {
         seterror(error.response.data.message);
       }
@@ -70,7 +73,6 @@ const RegisterScreen = () => {
       )
         .then((res) => res.json())
         .then((data) => {
-          console.log(data);
           setPic(data.url.toString());
         })
         .catch((error) => {
@@ -136,11 +138,9 @@ const RegisterScreen = () => {
                 }}
               />
             </Form.Group>
-            {
-              picMessage && (
-                <ErrorMessage variant="danger" >{ picMessage}</ErrorMessage>
-              )
-                }
+            {picMessage && (
+              <ErrorMessage variant="danger">{picMessage}</ErrorMessage>
+            )}
             {/* <Form.Group controlId="pic" className="mb-3">
               <Form.Label>Profile Picture</Form.Label>
               <Form.Control type="file" accept=".png,.jpg,.jpeg" onChange={(e)=>postPIC(e.target.value)} />

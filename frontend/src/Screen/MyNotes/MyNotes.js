@@ -1,44 +1,107 @@
 import React, { useEffect, useState } from "react";
-
 import MainScreen from "../../components/MainScreen/MainScreen";
 import { Badge, Button, Card } from "react-bootstrap";
 import Accordion from "react-bootstrap/Accordion";
-import { Link } from "react-router-dom";
-// import notes from "../../data/notes";
-import axios from 'axios';
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import Loading from "../../components/Loading";
+import ErrorMessage from "../../components/ErrorMessage";
 
 const MyNotes = () => {
-
   const [notes, setNotes] = useState([]);
+  const [error, seterror] = useState(false);
+  const [loading, setloading] = useState(false);
+  const history = useNavigate();
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
 
   useEffect(() => {
-    fetchNotes();
+    if (userInfo) {
+      localStorage.removeItem("noteData");
+      fetchNotes();
+    } else {
+      history("/");
+    }
   }, []);
 
+  const config = {
+    headers: {
+      "Content-type": "application/json",
+      Authorization: `Bearer ${userInfo?.token}`,
+    },
+  };
   const fetchNotes = async () => {
-    // fetch data from API or database
-    const { data } = await axios.get("/notes");
-    setNotes(data);
-    console.log(data);
-    
-  }
+    setloading(true);
+    try {
+      const response = await axios.get("notes/allNotes", config);
 
-  const deleteHandler = (id) => {
+      if (response.status === 200) {
+        const data = response.data;
+        setNotes(data);
+        seterror(false);
+      } else {
+        seterror("Unexpected response status: " + response.status);
+      }
+    } catch (err) {
+      console.error("Fetch notes error:", err);
+      const errorMessage =
+        err.response?.data?.message ||
+        "Failed to fetch notes. Please try again.";
+      seterror(errorMessage);
+    } finally {
+      setloading(false);
+    }
+  };
+
+  const deleteHandler = async (id) => {
     if (window.confirm("Are you sure..")) {
       // delete note logic here
+      try {
+        const response = await axios.delete(`notes/${id}`, config);
+
+        if (response.status === 200) {
+          const data = response.data;
+          alert("data deleted successfully");
+          seterror(false);
+          setNotes((prevNotes) => prevNotes.filter((note) => note._id !== id));
+        } else {
+          seterror("Unexpected response status: " + response.status);
+        }
+      } catch (err) {
+        console.error("Delete notes error:", err);
+        const errorMessage =
+          err.response?.data?.message ||
+          "Failed to Delete notes. Please try again.";
+        seterror(errorMessage);
+      } finally {
+        setloading(false);
+      }
     }
+  };
+
+  const editNote = async (n) => {
+    // edit note logic here
+    const noteData = {
+      id: n._id,
+      title: n.title,
+      content: n.content,
+      category: n.category,
+    };
+    localStorage.setItem("noteData", JSON.stringify(noteData));
+    history("/createnote");
   };
 
   return (
     <div>
-      <MainScreen title={"My Screen"}>
+      <MainScreen title={`Welcome Back ${userInfo?.name}`}>
         <Link to={"/createnote"}>
           <Button style={{ marginLeft: 10, marginBottom: 6 }} size="lg">
             Create New Note
           </Button>
         </Link>
+        {error && <ErrorMessage variant="">{error}</ErrorMessage>}
+        {loading && <Loading />}
 
-        {notes.map((n, index) => (
+        {notes?.map((n, index) => (
           <Accordion key={n._id || index}>
             <Card style={{ margin: 10 }}>
               <Accordion.Item eventKey={String(index)}>
@@ -69,7 +132,7 @@ const MyNotes = () => {
                         gap: "10px",
                       }}
                     >
-                      <Button href={`/notes/${n._id}`}>Edit</Button>
+                      <Button onClick={() => editNote(n)}>Edit</Button>
                       <Button
                         variant="danger"
                         onClick={() => deleteHandler(n._id)}
@@ -87,7 +150,10 @@ const MyNotes = () => {
                     <blockquote className="blockquote mb-0">
                       <p>{n.content}</p>
                       <footer className="blockquote-footer">
-                        Created at - date
+                        Created on{" "}
+                        <cite title="Source Title">
+                          {n.createdAt.substring(0, 10)}
+                        </cite>
                       </footer>
                     </blockquote>
                   </Card.Body>
